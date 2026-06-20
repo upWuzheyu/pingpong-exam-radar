@@ -239,6 +239,9 @@ export default function App() {
       isMock: false,
       verified: false,
       dataSourceType: 'manual',
+      category: form.certificateType.includes('裁判') ? '裁判员' : '教练员',
+      level: form.certificateType.includes('裁判') ? '裁判员（未分级）' : '教练员（未分级）',
+      matchReason: '手动添加：用户自行录入，需人工核验。',
     };
 
     setItems((current) => [item, ...current]);

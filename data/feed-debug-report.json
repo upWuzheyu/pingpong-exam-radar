@@ -1,0 +1,170 @@
+[
+  {
+    "sourceName": "中国乒乓球协会官网",
+    "sourceUrl": "https://www.ctta.cn/xhgg/",
+    "ok": true,
+    "statusCode": 200,
+    "htmlLength": 18946,
+    "totalLinksFound": 87,
+    "matchedLinksCount": 5,
+    "matchedLinks": [
+      {
+        "title": "中国乒乓球协会关于举办2024年全国高级教练员执教能力培训班湖南站的通知",
+        "url": "https://www.ctta.cn/xhgg/pxtz/2024/1206/637633.html",
+        "matchedKeywords": [
+          "乒乓球",
+          "教练员",
+          "培训",
+          "高级",
+          "通知"
+        ],
+        "matchReason": "包含乒乓球；包含教练员；包含培训"
+      },
+      {
+        "title": "中国乒乓球协会关于举办2024年全国初级教练员执教能力培训班湖南站的通知",
+        "url": "https://www.ctta.cn/xhgg/pxtz/2024/1204/637214.html",
+        "matchedKeywords": [
+          "乒乓球",
+          "教练员",
+          "培训",
+          "初级",
+          "通知"
+        ],
+        "matchReason": "包含乒乓球；包含教练员；包含培训"
+      },
+      {
+        "title": "中国乒乓球协会关于举办2024年全国中级教练员执教能力培训班威海站的通知",
+        "url": "https://www.ctta.cn/xhgg/pxtz/2024/1116/634425.html",
+        "matchedKeywords": [
+          "乒乓球",
+          "教练员",
+          "培训",
+          "中级",
+          "通知"
+        ],
+        "matchReason": "包含乒乓球；包含教练员；包含培训"
+      },
+      {
+        "title": "中国乒乓球协会关于举办2024年全国初级教练员执教能力培训班四川站的通知",
+        "url": "https://www.ctta.cn/xhgg/pxtz/2024/0726/611829.html",
+        "matchedKeywords": [
+          "乒乓球",
+          "教练员",
+          "培训",
+          "初级",
+          "通知"
+        ],
+        "matchReason": "包含乒乓球；包含教练员；包含培训"
+      },
+      {
+        "title": "2024年全国乒乓球教练员执教能力培训班-培训合格学员名单公示合辑",
+        "url": "https://www.ctta.cn/xhgg/pxtz/2024/0723/611496.html",
+        "matchedKeywords": [
+          "乒乓球",
+          "教练员",
+          "培训"
+        ],
+        "matchReason": "包含乒乓球；包含教练员；包含培训"
+      }
+    ],
+    "errorMessage": "",
+    "checkedAt": "2026-06-20T16:40:00.263Z"
+  },
+  {
+    "sourceName": "广东省乒乓球协会",
+    "sourceUrl": "https://gdtta.cn/",
+    "ok": true,
+    "statusCode": 200,
+    "htmlLength": 13749,
+    "totalLinksFound": 61,
+    "matchedLinksCount": 2,
+    "matchedLinks": [
+      {
+        "title": "关于举办2026年广东省乒乓球晋升一级裁判员培训班的通知",
+        "url": "https://gdtta.cn/news/175",
+        "matchedKeywords": [
+          "乒乓球",
+          "裁判员",
+          "培训",
+          "晋升",
+          "一级",
+          "通知"
+        ],
+        "matchReason": "包含乒乓球；包含裁判员；包含培训"
+      },
+      {
+        "title": "关于举办2026年广东省乒乓球（中级）教练员执教技能培训班的通知",
+        "url": "https://gdtta.cn/news/174",
+        "matchedKeywords": [
+          "乒乓球",
+          "教练员",
+          "培训",
+          "中级",
+          "通知"
+        ],
+        "matchReason": "包含乒乓球；包含教练员；包含培训"
+      }
+    ],
+    "errorMessage": "",
+    "checkedAt": "2026-06-20T16:40:00.375Z"
+  },
+  {
+    "sourceName": "常州市体育局",
+    "sourceUrl": "https://tyj.changzhou.gov.cn/",
+    "ok": true,
+    "statusCode": 200,
+    "htmlLength": 61141,
+    "totalLinksFound": 92,
+    "matchedLinksCount": 0,
+    "matchedLinks": [],
+    "errorMessage": "",
+    "checkedAt": "2026-06-20T16:40:00.545Z"
+  },
+  {
+    "sourceName": "山西省体育局",
+    "sourceUrl": "https://tyj.shanxi.gov.cn/",
+    "ok": true,
+    "statusCode": 200,
+    "htmlLength": 102404,
+    "totalLinksFound": 189,
+    "matchedLinksCount": 2,
+    "matchedLinks": [
+      {
+        "title": "· 全省乒乓球高级裁判员培训班结业2026-06-16",
+        "url": "https://tyj.shanxi.gov.cn/tyzh/tyzhhd/202606/t20260616_10148377.shtml",
+        "matchedKeywords": [
+          "乒乓球",
+          "裁判员",
+          "培训",
+          "高级"
+        ],
+        "matchReason": "包含乒乓球；包含裁判员；包含培训"
+      },
+      {
+        "title": "· 全省乒乓球高级裁判员培训班开班2026-06-13",
+        "url": "https://tyj.shanxi.gov.cn/tyzh/tyzhhd/202606/t20260613_10145823.shtml",
+        "matchedKeywords": [
+          "乒乓球",
+          "裁判员",
+          "培训",
+          "高级"
+        ],
+        "matchReason": "包含乒乓球；包含裁判员；包含培训"
+      }
+    ],
+    "errorMessage": "",
+    "checkedAt": "2026-06-20T16:40:00.936Z"
+  },
+  {
+    "sourceName": "江西省体育局",
+    "sourceUrl": "https://tyj.jiangxi.gov.cn/",
+    "ok": true,
+    "statusCode": 200,
+    "htmlLength": 217905,
+    "totalLinksFound": 121,
+    "matchedLinksCount": 0,
+    "matchedLinks": [],
+    "errorMessage": "",
+    "checkedAt": "2026-06-20T16:40:01.386Z"
+  }
+]

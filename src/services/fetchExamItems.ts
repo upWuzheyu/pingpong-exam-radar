@@ -29,6 +29,9 @@ const REQUIRED_FIELDS: Array<keyof ExamItem> = [
   'dataSourceType',
   'lastCheckedAt',
   'note',
+  'category',
+  'level',
+  'matchReason',
 ];
 
 export async function fetchExamItemsFromFeed(): Promise<ExamFeedResult> {

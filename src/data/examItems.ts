@@ -19,6 +19,9 @@ export const localExamItems: ExamItem[] = [
     isMock: false,
     verified: true,
     dataSourceType: 'official',
+    category: '裁判员',
+    level: '二级裁判员',
+    matchReason: '人工核验：标题包含乒乓球、二级裁判员、培训班、通知。',
   },
   {
     id: 'mock-sx-coach-2026-07',
@@ -38,6 +41,9 @@ export const localExamItems: ExamItem[] = [
     isMock: true,
     verified: false,
     dataSourceType: 'mock',
+    category: '教练员',
+    level: '初级教练员',
+    matchReason: '示例数据：用于测试教练员报名提醒。',
   },
   {
     id: 'mock-jx-referee-2026-06',
@@ -57,6 +63,9 @@ export const localExamItems: ExamItem[] = [
     isMock: true,
     verified: false,
     dataSourceType: 'mock',
+    category: '裁判员',
+    level: '二级裁判员',
+    matchReason: '示例数据：用于测试裁判员截止提醒。',
   },
   {
     id: 'mock-national-coach-2026-08',
@@ -76,6 +85,9 @@ export const localExamItems: ExamItem[] = [
     isMock: true,
     verified: false,
     dataSourceType: 'mock',
+    category: '教练员',
+    level: '初级教练员',
+    matchReason: '示例数据：用于测试全国教练员机会筛选。',
   },
   {
     id: 'mock-deadline-referee-2026-06',
@@ -95,6 +107,9 @@ export const localExamItems: ExamItem[] = [
     isMock: true,
     verified: false,
     dataSourceType: 'mock',
+    category: '裁判员',
+    level: '二级裁判员',
+    matchReason: '示例数据：用于测试裁判员报名截止当天高亮。',
   },
   {
     id: 'mock-ended-coach-2026-05',
@@ -114,5 +129,8 @@ export const localExamItems: ExamItem[] = [
     isMock: true,
     verified: false,
     dataSourceType: 'mock',
+    category: '教练员',
+    level: '初级教练员',
+    matchReason: '示例数据：用于测试已截止教练员报名置灰。',
   },
 ];

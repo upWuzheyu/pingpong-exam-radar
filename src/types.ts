@@ -8,6 +8,8 @@ export type TimeFilter = '全部' | '最近7天' | '最近30天';
 
 export type DataSourceType = 'official' | 'manual' | 'mock';
 
+export type ExamCategory = '裁判员' | '教练员';
+
 export type ExamItem = {
   id: string;
   title: string;
@@ -26,6 +28,9 @@ export type ExamItem = {
   isMock: boolean;
   verified: boolean;
   dataSourceType: DataSourceType;
+  category: ExamCategory;
+  level: string;
+  matchReason: string;
 };
 
 export type CalendarEventMap = Record<

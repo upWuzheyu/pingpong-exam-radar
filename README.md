@@ -79,6 +79,12 @@ lastCheckedAt, note
 scripts/updateExamFeed.js
 ```
 
+本地运行：
+
+```bash
+node scripts/updateExamFeed.js
+```
+
 GitHub Actions：
 
 ```text
@@ -100,9 +106,22 @@ data/feed-sources.json
 data/exam-feed.generated.json
 ```
 
+脚本还会输出调试报告：
+
+```text
+data/feed-debug-report.json
+```
+
+可以用它判断每个来源为什么没有抓到候选通知：
+
+- `totalLinksFound = 0`：页面没有解析到链接，可能是页面结构特殊、JS 动态渲染、访问被拦截，或 HTML 不是预期内容。
+- `matchedLinksCount = 0`：页面解析到了链接，但标题、链接文本或 URL 没有命中关键词。
+- `errorMessage` 有内容：该来源访问失败，可以看 GitHub Actions 日志里的 HTTP 状态、错误信息和来源 URL。
+- `matchedLinks` 有内容：脚本找到了候选链接，但候选结果默认仍是 `verified: false` 和 `status: "待核验"`，需要人工核验报名时间、地点和资格要求。
+
 以后可以在 `scripts/updateExamFeed.js` 中继续增加真实网站检查逻辑，例如进入详情页解析报名开始日期、报名截止日期、培训地点，再把核验后的通知转换为 `verified: true` 的 `ExamItem` 数据。
 
-GitHub Actions 每天北京时间上午 8 点左右运行一次，也支持手动触发 `workflow_dispatch`。如果生成的 `data/exam-feed.generated.json` 有变化，会自动提交到仓库。
+GitHub Actions 每天北京时间上午 8 点左右运行一次，也支持手动触发 `workflow_dispatch`。如果生成的 `data/exam-feed.generated.json` 或 `data/feed-debug-report.json` 有变化，会自动提交到仓库。
 
 ## 安全规则
 

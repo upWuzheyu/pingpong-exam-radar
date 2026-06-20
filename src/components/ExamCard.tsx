@@ -58,6 +58,8 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
       {detailed ? (
         <View style={styles.detailBody}>
           <DetailLine label="发布单位" value={item.organization} />
+          <DetailLine label="类别" value={`${item.category} · ${item.level}`} />
+          <DetailLine label="命中原因" value={item.matchReason || '人工录入或历史数据'} />
           <DetailLine label="考试地点" value={item.location} />
           <DetailLine label="数据类型" value={getDataSourceLabel(item.dataSourceType)} />
           <DetailLine label="来源链接" value={item.sourceUrl || '暂无官方链接'} />

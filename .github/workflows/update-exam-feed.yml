@@ -26,7 +26,7 @@ jobs:
 
       - name: Commit generated feed
         run: |
-          if git diff --quiet -- data/exam-feed.generated.json; then
+          if git diff --quiet -- data/exam-feed.generated.json data/feed-debug-report.json; then
             echo "No feed changes to commit."
             exit 0
           fi
@@ -34,5 +34,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/exam-feed.generated.json
-          git commit -m "Update generated exam feed"
+          git add data/feed-debug-report.json
+          git commit -m "Update generated exam feed and debug report"
           git push

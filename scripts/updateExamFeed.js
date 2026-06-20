@@ -8,8 +8,22 @@ const rootDir = path.resolve(__dirname, '..');
 const exampleFeedPath = path.join(rootDir, 'data', 'exam-feed.example.json');
 const sourcesPath = path.join(rootDir, 'data', 'feed-sources.json');
 const generatedFeedPath = path.join(rootDir, 'data', 'exam-feed.generated.json');
+const debugReportPath = path.join(rootDir, 'data', 'feed-debug-report.json');
 
-const candidateSignals = ['乒乓球', '裁判员', '教练员', '培训', '培训班', '晋升', '报名', '通知'];
+const tableTennisKeyword = '乒乓球';
+const roleKeywords = ['裁判员', '教练员'];
+const actionKeywords = ['报名', '培训', '考试', '晋升', '认证', '资格'];
+const debugKeywords = [
+  tableTennisKeyword,
+  ...roleKeywords,
+  ...actionKeywords,
+  '一级',
+  '二级',
+  '三级',
+  '初级',
+  '中级',
+  '高级',
+];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -28,32 +42,33 @@ async function fetchText(url) {
       url,
       {
         headers: {
-          'accept': 'text/html,application/xhtml+xml',
+          accept: 'text/html,application/xhtml+xml',
           'accept-encoding': 'identity',
           'user-agent': 'calendar-app-exam-feed-updater/1.0',
         },
         timeout: 15000,
       },
       (response) => {
-        if (
-          response.statusCode >= 300 &&
-          response.statusCode < 400 &&
-          response.headers.location
-        ) {
+        const statusCode = response.statusCode || 0;
+
+        if (statusCode >= 300 && statusCode < 400 && response.headers.location) {
           response.resume();
           resolve(fetchText(new URL(response.headers.location, url).toString()));
           return;
         }
 
-        if (response.statusCode < 200 || response.statusCode >= 300) {
-          response.resume();
-          reject(new Error(`HTTP ${response.statusCode}`));
-          return;
-        }
-
         const chunks = [];
         response.on('data', (chunk) => chunks.push(chunk));
-        response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+        response.on('end', () => {
+          const html = Buffer.concat(chunks).toString('utf8');
+
+          if (statusCode < 200 || statusCode >= 300) {
+            reject(Object.assign(new Error(`HTTP ${statusCode}`), { statusCode, html }));
+            return;
+          }
+
+          resolve({ html, statusCode });
+        });
       }
     );
 
@@ -66,32 +81,54 @@ async function fetchText(url) {
 
 function extractLinks(html, baseUrl) {
   const links = [];
-  const anchorPattern = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  const seen = new Set();
+  const anchorPattern = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
   let match;
 
   while ((match = anchorPattern.exec(html)) !== null) {
-    const href = decodeHtml(stripTags(match[1])).trim();
-    const title = decodeHtml(stripTags(match[2])).replace(/\s+/g, ' ').trim();
+    const attributes = match[1] || '';
+    const body = match[2] || '';
+    const href = decodeHtml(getAttribute(attributes, 'href') || '').trim();
 
-    if (!href || !title || href.startsWith('javascript:') || href.startsWith('#')) {
+    if (!href || href.startsWith('javascript:') || href.startsWith('#')) {
       continue;
     }
 
+    let url;
     try {
-      links.push({
-        title,
-        url: new URL(href, baseUrl).toString(),
-      });
+      url = new URL(href, baseUrl).toString();
     } catch {
-      // Ignore malformed links from source pages.
+      continue;
     }
+
+    const titleAttribute = decodeHtml(getAttribute(attributes, 'title') || '').trim();
+    const text = normalizeText(decodeHtml(stripTags(body)));
+    const title = text || normalizeText(titleAttribute) || href;
+    const dedupeKey = `${url}::${title}`;
+
+    if (seen.has(dedupeKey)) {
+      continue;
+    }
+
+    seen.add(dedupeKey);
+    links.push({ title, url, text, href });
   }
 
   return links;
 }
 
+function getAttribute(attributes, name) {
+  const pattern = new RegExp(`${name}\\s*=\\s*["']([^"']+)["']`, 'i');
+  const match = attributes.match(pattern);
+  return match?.[1] || '';
+}
+
 function stripTags(value) {
   return value.replace(/<[^>]*>/g, '');
+}
+
+function normalizeText(value) {
+  return value.replace(/\s+/g, ' ').trim();
 }
 
 function decodeHtml(value) {
@@ -104,18 +141,46 @@ function decodeHtml(value) {
     .replace(/&#39;/g, "'");
 }
 
-function isCandidateTitle(title, keywords) {
-  const matchedKeywords = keywords.filter((keyword) => title.includes(keyword));
-  const matchedSignals = candidateSignals.filter((keyword) => title.includes(keyword));
+function getMatchedKeywords(link, sourceKeywords) {
+  const searchTarget = `${link.title} ${link.text || ''} ${link.url}`;
+  const keywords = Array.from(new Set([...debugKeywords, ...(sourceKeywords || [])]));
+  return keywords.filter((keyword) => searchTarget.includes(keyword));
+}
 
-  return matchedKeywords.length > 0 && matchedSignals.length >= 2;
+function getCandidateMatch(link, sourceKeywords) {
+  const searchTarget = `${link.title} ${link.text || ''} ${link.url}`;
+  const matchedKeywords = getMatchedKeywords(link, sourceKeywords);
+  const hasTableTennis = searchTarget.includes(tableTennisKeyword);
+  const matchedRole = roleKeywords.find((keyword) => searchTarget.includes(keyword)) || '';
+  const matchedAction = actionKeywords.find((keyword) => searchTarget.includes(keyword)) || '';
+
+  if (!hasTableTennis || !matchedRole || !matchedAction) {
+    return {
+      ok: false,
+      matchedKeywords,
+      matchReason: [
+        hasTableTennis ? '包含乒乓球' : '缺少乒乓球',
+        matchedRole ? `包含${matchedRole}` : '缺少裁判员/教练员',
+        matchedAction ? `包含${matchedAction}` : '缺少报名/培训/考试/晋升/认证/资格',
+      ].join('；'),
+    };
+  }
+
+  return {
+    ok: true,
+    matchedKeywords,
+    matchReason: `包含乒乓球；包含${matchedRole}；包含${matchedAction}`,
+  };
 }
 
 function toExamItem(link, source, checkedAt) {
+  const category = inferCategory(link.title);
+  const level = inferLevel(link.title, category);
+
   return {
     id: `auto-${hash(`${source.name}:${link.url}:${link.title}`)}`,
     title: link.title,
-    certificateType: inferCertificateType(link.title),
+    certificateType: inferCertificateType(category, level),
     province: inferProvince(source),
     city: inferCity(source),
     organization: source.name,
@@ -129,15 +194,38 @@ function toExamItem(link, source, checkedAt) {
     verified: false,
     dataSourceType: 'official',
     lastCheckedAt: checkedAt,
-    note: '自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。',
+    note: '自动抓取候选结果，需人工核验报名时间、地点和资格要求',
+    category,
+    level,
+    matchReason: link.matchReason,
   };
 }
 
-function inferCertificateType(title) {
-  if (title.includes('裁判')) {
-    return title.includes('乒乓球') ? '乒乓球二级裁判员证' : '二级裁判员证';
+function inferCategory(title) {
+  return title.includes('裁判员') ? '裁判员' : '教练员';
+}
+
+function inferLevel(title, category) {
+  if (category === '裁判员') {
+    if (title.includes('一级裁判员') || title.includes('一级')) return '一级裁判员';
+    if (title.includes('二级裁判员') || title.includes('二级')) return '二级裁判员';
+    if (title.includes('三级裁判员') || title.includes('三级')) return '三级裁判员';
+    return '裁判员（未分级）';
   }
 
+  if (title.includes('初级教练员') || title.includes('初级')) return '初级教练员';
+  if (title.includes('中级教练员') || title.includes('中级')) return '中级教练员';
+  if (title.includes('高级教练员') || title.includes('高级')) return '高级教练员';
+  return '教练员（未分级）';
+}
+
+function inferCertificateType(category, level) {
+  if (category === '裁判员') {
+    if (level === '二级裁判员') return '乒乓球二级裁判员证';
+    return '二级裁判员证';
+  }
+
+  if (level === '初级教练员') return '初级教练员证';
   return '初级教练员证';
 }
 
@@ -175,36 +263,112 @@ function dedupeItems(items) {
   return result;
 }
 
-async function collectCandidates(sources) {
+async function inspectSource(source) {
   const checkedAt = new Date().toISOString();
+  const report = {
+    sourceName: source.name,
+    sourceUrl: source.url,
+    ok: false,
+    statusCode: null,
+    htmlLength: 0,
+    totalLinksFound: 0,
+    matchedLinksCount: 0,
+    matchedLinks: [],
+    errorMessage: '',
+    checkedAt,
+  };
+
+  console.log(`\n=== Checking source: ${source.name} ===`);
+  console.log(`URL: ${source.url}`);
+
+  try {
+    const { html, statusCode } = await fetchText(source.url);
+    report.ok = true;
+    report.statusCode = statusCode;
+    report.htmlLength = html.length;
+
+    console.log(`HTTP success: yes`);
+    console.log(`HTTP status: ${statusCode}`);
+    console.log(`HTML length: ${html.length}`);
+
+    const links = extractLinks(html, source.url);
+    report.totalLinksFound = links.length;
+    console.log(`Total links extracted: ${links.length}`);
+
+    const matchedLinks = links
+      .map((link) => {
+        const match = getCandidateMatch(link, source.keywords);
+        return {
+          ...link,
+          matchedKeywords: match.matchedKeywords,
+          matchReason: match.matchReason,
+          isCandidate: match.ok,
+        };
+      })
+      .filter((link) => link.isCandidate);
+
+    report.matchedLinks = matchedLinks.map((link) => ({
+      title: link.title,
+      url: link.url,
+      matchedKeywords: link.matchedKeywords,
+      matchReason: link.matchReason,
+    }));
+    report.matchedLinksCount = report.matchedLinks.length;
+
+    console.log(`Matched candidate links: ${report.matchedLinksCount}`);
+    if (report.matchedLinksCount === 0) {
+      console.log(`No candidates: no extracted link title/text/URL contained configured keywords.`);
+    } else {
+      for (const link of report.matchedLinks) {
+        console.log(`- ${link.title}`);
+        console.log(`  ${link.url}`);
+        console.log(`  matched: ${link.matchedKeywords.join(', ')}`);
+        console.log(`  reason: ${link.matchReason}`);
+      }
+    }
+
+    return {
+      report,
+      candidates: matchedLinks.map((link) => toExamItem(link, source, checkedAt)),
+    };
+  } catch (error) {
+    report.statusCode = error.statusCode || null;
+    report.htmlLength = error.html?.length || 0;
+    report.errorMessage = error.message || String(error);
+
+    console.log(`HTTP success: no`);
+    console.log(`HTTP status: ${report.statusCode ?? 'unknown'}`);
+    console.log(`HTML length: ${report.htmlLength}`);
+    console.log(`No candidates: source request failed.`);
+    console.warn(`Error: ${report.errorMessage}`);
+
+    return { report, candidates: [] };
+  }
+}
+
+async function collectCandidates(sources) {
   const candidates = [];
+  const debugReport = [];
 
   for (const source of sources) {
-    try {
-      console.log(`Fetching ${source.name}: ${source.url}`);
-      const html = await fetchText(source.url);
-      const links = extractLinks(html, source.url).filter((link) =>
-        isCandidateTitle(link.title, source.keywords)
-      );
-
-      console.log(`Found ${links.length} candidate links from ${source.name}`);
-      candidates.push(...links.map((link) => toExamItem(link, source, checkedAt)));
-    } catch (error) {
-      console.warn(`Failed to fetch ${source.name}: ${error.message}`);
-    }
+    const result = await inspectSource(source);
+    candidates.push(...result.candidates);
+    debugReport.push(result.report);
   }
 
-  return candidates;
+  return { candidates, debugReport };
 }
 
 async function main() {
   const seedItems = readJson(exampleFeedPath);
   const sources = readJson(sourcesPath);
-  const candidates = await collectCandidates(sources);
+  const { candidates, debugReport } = await collectCandidates(sources);
   const generatedItems = dedupeItems([...seedItems, ...candidates]);
 
   writeJson(generatedFeedPath, generatedItems);
-  console.log(`Wrote ${generatedItems.length} items to ${generatedFeedPath}`);
+  writeJson(debugReportPath, debugReport);
+  console.log(`\nWrote ${generatedItems.length} items to ${generatedFeedPath}`);
+  console.log(`Wrote debug report to ${debugReportPath}`);
 }
 
 main().catch((error) => {
