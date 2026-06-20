@@ -10,6 +10,16 @@ export type DataSourceType = 'official' | 'manual' | 'mock';
 
 export type ExamCategory = '裁判员' | '教练员';
 
+export type RadarStatus =
+  | '历史通知'
+  | '待核验'
+  | '未开始'
+  | '报名中'
+  | '即将截止'
+  | '已截止';
+
+export type RadarPriority = 'high' | 'medium' | 'low';
+
 export type ExamItem = {
   id: string;
   title: string;
@@ -31,6 +41,19 @@ export type ExamItem = {
   category: ExamCategory;
   level: string;
   matchReason: string;
+};
+
+export type RadarInfo = {
+  radarStatus: RadarStatus;
+  priority: RadarPriority;
+  daysUntilDeadline: number | null;
+  daysUntilStart: number | null;
+  isHistorical: boolean;
+  canApply: boolean;
+  actionLabel: string;
+  statusLabel: string;
+  statusColorType: 'hot' | 'active' | 'pending' | 'future' | 'closed' | 'history';
+  notifyReason: string;
 };
 
 export type CalendarEventMap = Record<

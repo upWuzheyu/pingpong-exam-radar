@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { ExamItem, ExamStatus } from '../types';
-import { canOpenOfficialSource, canOpenSourcePage, getRelativeDeadlineText } from '../utils/exam';
+import { ExamItem, RadarInfo } from '../types';
+import { canOpenSourcePage, getRadarInfo, getRelativeDeadlineText } from '../utils/exam';
 
 type ExamCardProps = {
   compact?: boolean;
@@ -13,9 +13,12 @@ type ExamCardProps = {
 };
 
 export default function ExamCard({ compact, detailed, item, onOpen, onPress }: ExamCardProps) {
-  const ended = item.status === '已截止';
-  const canGoRegister = canOpenOfficialSource(item);
+  const radar = getRadarInfo(item);
+  const ended = radar.radarStatus === '已截止' || radar.isHistorical;
+  const canGoRegister = radar.canApply;
   const canOpenSource = canOpenSourcePage(item);
+  const category = item.category || (item.certificateType.includes('裁判') ? '裁判员' : '教练员');
+  const level = item.level || (category === '裁判员' ? '裁判员（未分级）' : '教练员（未分级）');
 
   return (
     <TouchableOpacity
@@ -31,12 +34,19 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
             {item.province}{item.city} · {item.certificateType}
           </Text>
         </View>
-        <StatusPill status={item.status} />
+        <StatusPill radar={radar} />
       </View>
 
       <View style={styles.dateRow}>
-        <DateBlock label="报名" value={`${item.registrationStartDate} 至 ${item.registrationEndDate}`} />
-        {!compact ? <DateBlock label="考试" value={item.examDate} /> : null}
+        <DateBlock
+          label="报名"
+          value={
+            item.registrationStartDate && item.registrationEndDate
+              ? `${item.registrationStartDate} 至 ${item.registrationEndDate}`
+              : '待核验'
+          }
+        />
+        {!compact ? <DateBlock label="考试" value={item.examDate || '待核验'} /> : null}
       </View>
 
       <Text style={[styles.deadlineText, item.status === '即将截止' && styles.deadlineHot]}>
@@ -47,6 +57,7 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
         {canGoRegister ? (
           <Text style={styles.officialNotice}>真实官方通知</Text>
         ) : null}
+        <Text style={styles.categoryNotice}>{category} · {level}</Text>
         {item.isMock ? (
           <Text style={styles.mockNotice}>示例数据，非真实报名通知</Text>
         ) : null}
@@ -58,12 +69,13 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
       {detailed ? (
         <View style={styles.detailBody}>
           <DetailLine label="发布单位" value={item.organization} />
-          <DetailLine label="类别" value={`${item.category} · ${item.level}`} />
-          <DetailLine label="命中原因" value={item.matchReason || '人工录入或历史数据'} />
-          <DetailLine label="考试地点" value={item.location} />
+          <DetailLine label="类别" value={`${category} · ${level}`} />
+          <DetailLine label="命中原因" value={item.matchReason || radar.notifyReason} />
+          <DetailLine label="考试地点" value={item.location || '待核验'} />
+          <DetailLine label="状态" value={`${radar.statusLabel}｜${radar.notifyReason}`} />
           <DetailLine label="数据类型" value={getDataSourceLabel(item.dataSourceType)} />
           <DetailLine label="来源链接" value={item.sourceUrl || '暂无官方链接'} />
-          <DetailLine label="链接状态" value={canGoRegister ? '查看官方通知' : canOpenSource ? '查看来源' : '暂无官方链接'} />
+          <DetailLine label="链接状态" value={radar.actionLabel} />
           <DetailLine label="最后检查" value={new Date(item.lastCheckedAt).toLocaleString()} />
           <DetailLine label="备注" value={item.note} />
         </View>
@@ -75,7 +87,7 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
         style={[styles.linkButton, !canOpenSource && styles.linkButtonDisabled]}
       >
         <Text style={[styles.linkButtonText, !canOpenSource && styles.linkButtonTextDisabled]}>
-          {canGoRegister ? '查看官方通知 / 去报名' : canOpenSource ? '查看来源' : '暂无官方链接'}
+          {radar.actionLabel}
         </Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -92,10 +104,12 @@ function getDataSourceLabel(dataSourceType: ExamItem['dataSourceType']): string 
   return '示例数据';
 }
 
-function StatusPill({ status }: { status: ExamStatus }) {
+function StatusPill({ radar }: { radar: RadarInfo }) {
   return (
-    <View style={[styles.statusPill, statusStyles[status]]}>
-      <Text style={[styles.statusText, statusTextStyles[status]]}>{status}</Text>
+    <View style={[styles.statusPill, statusStyles[radar.statusColorType]]}>
+      <Text style={[styles.statusText, statusTextStyles[radar.statusColorType]]}>
+        {radar.radarStatus}
+      </Text>
     </View>
   );
 }
@@ -119,52 +133,58 @@ function DetailLine({ label, value }: { label: string; value: string }) {
 }
 
 const statusStyles = StyleSheet.create({
-  未开始: {
+  future: {
     backgroundColor: '#eef6ff',
   },
-  报名中: {
+  active: {
     backgroundColor: '#dcfce7',
   },
-  即将截止: {
+  hot: {
     backgroundColor: '#ffedd5',
   },
-  已截止: {
+  closed: {
     backgroundColor: '#e5e7eb',
   },
-  待核验: {
+  pending: {
     backgroundColor: '#fef3c7',
+  },
+  history: {
+    backgroundColor: '#e5e7eb',
   },
 });
 
 const statusTextStyles = StyleSheet.create({
-  未开始: {
+  future: {
     color: '#2563eb',
   },
-  报名中: {
+  active: {
     color: '#15803d',
   },
-  即将截止: {
+  hot: {
     color: '#c2410c',
   },
-  已截止: {
+  closed: {
     color: '#6b7280',
   },
-  待核验: {
+  pending: {
     color: '#92400e',
+  },
+  history: {
+    color: '#6b7280',
   },
 });
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d9e5e8',
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    borderColor: '#263f6c',
     borderRadius: 8,
     borderWidth: 1,
     padding: 14,
   },
   cardEnded: {
-    backgroundColor: '#f3f4f6',
-    opacity: 0.72,
+    backgroundColor: 'rgba(30, 41, 59, 0.72)',
+    opacity: 0.78,
   },
   cardHeader: {
     alignItems: 'flex-start',
@@ -177,17 +197,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: '#102027',
+    color: '#f8fbff',
     fontSize: 16,
     fontWeight: '900',
     lineHeight: 22,
     marginBottom: 5,
   },
   endedText: {
-    color: '#6b7280',
+    color: '#94a3b8',
   },
   meta: {
-    color: '#667985',
+    color: '#9bb4d5',
     fontSize: 13,
     fontWeight: '800',
   },
@@ -205,24 +225,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dateBlock: {
-    backgroundColor: '#f6fafb',
+    backgroundColor: 'rgba(17, 26, 51, 0.92)',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
   dateLabel: {
-    color: '#768994',
+    color: '#79e8ff',
     fontSize: 12,
     fontWeight: '900',
     marginBottom: 2,
   },
   dateValue: {
-    color: '#21343c',
+    color: '#dbe8ff',
     fontSize: 13,
     fontWeight: '800',
   },
   deadlineText: {
-    color: '#0f766e',
+    color: '#79e8ff',
     fontSize: 14,
     fontWeight: '900',
     marginBottom: 10,
@@ -254,6 +274,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 7,
   },
+  categoryNotice: {
+    backgroundColor: '#e0e7ff',
+    borderRadius: 8,
+    color: '#4338ca',
+    fontSize: 13,
+    fontWeight: '900',
+    overflow: 'hidden',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
   unverifiedNotice: {
     backgroundColor: '#fef2f2',
     borderRadius: 8,
@@ -265,7 +295,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   detailBody: {
-    borderTopColor: '#e3ecef',
+    borderTopColor: '#263f6c',
     borderTopWidth: 1,
     marginTop: 4,
     paddingTop: 10,
@@ -274,26 +304,26 @@ const styles = StyleSheet.create({
     marginBottom: 9,
   },
   detailLabel: {
-    color: '#768994',
+    color: '#79e8ff',
     fontSize: 12,
     fontWeight: '900',
     marginBottom: 3,
   },
   detailValue: {
-    color: '#21343c',
+    color: '#dbe8ff',
     fontSize: 14,
     fontWeight: '700',
     lineHeight: 20,
   },
   linkButton: {
     alignItems: 'center',
-    backgroundColor: '#102027',
+    backgroundColor: '#2f6bff',
     borderRadius: 8,
     justifyContent: 'center',
     minHeight: 42,
   },
   linkButtonDisabled: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#1f2937',
   },
   linkButtonText: {
     color: '#ffffff',
@@ -301,6 +331,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   linkButtonTextDisabled: {
-    color: '#6b7280',
+    color: '#94a3b8',
   },
 });

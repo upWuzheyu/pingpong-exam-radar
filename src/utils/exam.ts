@@ -1,4 +1,11 @@
-import { CertificateType, CalendarEventMap, ExamItem, ExamStatus, RegionFilter } from '../types';
+import {
+  CertificateType,
+  CalendarEventMap,
+  ExamItem,
+  ExamStatus,
+  RadarInfo,
+  RegionFilter,
+} from '../types';
 import { dayDifference, formatDateKey } from './date';
 
 export const CERTIFICATE_TYPES: CertificateType[] = [
@@ -10,30 +17,138 @@ export const CERTIFICATE_TYPES: CertificateType[] = [
 export const REGION_OPTIONS: RegionFilter[] = ['山西', '江西', '全国'];
 
 export function getExamStatus(item: ExamItem, today = new Date()): ExamStatus {
-  if (item.status === '待核验' || !item.registrationEndDate || !item.registrationStartDate) {
-    return '待核验';
-  }
-
-  const startDiff = dayDifference(today, item.registrationStartDate);
-  const endDiff = dayDifference(today, item.registrationEndDate);
-
-  if (Number.isNaN(startDiff) || Number.isNaN(endDiff)) {
-    return '待核验';
-  }
-
-  if (endDiff < 0) {
+  const radar = getRadarInfo(item, today);
+  if (radar.radarStatus === '历史通知') {
     return '已截止';
   }
 
-  if (startDiff > 0) {
-    return '未开始';
+  return radar.radarStatus;
+}
+
+export function getRadarInfo(item: Partial<ExamItem>, today = new Date()): RadarInfo {
+  const title = item.title ?? '';
+  const verified = Boolean(item.verified);
+  const sourceUrl = item.sourceUrl ?? '';
+  const hasRequiredTiming = Boolean(
+    item.registrationStartDate && item.registrationEndDate && item.examDate && item.location
+  );
+  const isHistorical = detectHistoricalTitle(title, today);
+  const daysUntilStart = item.registrationStartDate
+    ? dayDifference(today, item.registrationStartDate)
+    : null;
+  const daysUntilDeadline = item.registrationEndDate
+    ? dayDifference(today, item.registrationEndDate)
+    : null;
+  const hasValidDateWindow =
+    typeof daysUntilStart === 'number' &&
+    typeof daysUntilDeadline === 'number' &&
+    !Number.isNaN(daysUntilStart) &&
+    !Number.isNaN(daysUntilDeadline);
+
+  if (isHistorical) {
+    return {
+      radarStatus: '历史通知',
+      priority: 'low',
+      daysUntilDeadline: normalizeDayValue(daysUntilDeadline),
+      daysUntilStart: normalizeDayValue(daysUntilStart),
+      isHistorical: true,
+      canApply: false,
+      actionLabel: sourceUrl ? '历史参考 / 查看来源' : '暂无官方链接',
+      statusLabel: '历史参考，不可报名',
+      statusColorType: 'history',
+      notifyReason: '标题包含早于当前年份的年份，仅作历史参考。',
+    };
   }
 
-  if (endDiff <= 3) {
-    return '即将截止';
+  if (item.status === '待核验' || !item.registrationEndDate || !item.registrationStartDate) {
+    return {
+      radarStatus: '待核验',
+      priority: 'medium',
+      daysUntilDeadline: normalizeDayValue(daysUntilDeadline),
+      daysUntilStart: normalizeDayValue(daysUntilStart),
+      isHistorical: false,
+      canApply: false,
+      actionLabel: sourceUrl ? '查看来源' : '暂无官方链接',
+      statusLabel: '待人工核验',
+      statusColorType: 'pending',
+      notifyReason: '缺少明确报名开始/截止时间，需要人工核验。',
+    };
   }
 
-  return '报名中';
+  if (!verified || !hasRequiredTiming || !hasValidDateWindow) {
+    return {
+      radarStatus: '待核验',
+      priority: 'medium',
+      daysUntilDeadline: normalizeDayValue(daysUntilDeadline),
+      daysUntilStart: normalizeDayValue(daysUntilStart),
+      isHistorical: false,
+      canApply: false,
+      actionLabel: sourceUrl ? '查看来源' : '暂无官方链接',
+      statusLabel: '待人工核验',
+      statusColorType: 'pending',
+      notifyReason: '未核验或缺少报名时间、考试时间、地点等关键字段。',
+    };
+  }
+
+  if (daysUntilDeadline < 0) {
+    return {
+      radarStatus: '已截止',
+      priority: 'low',
+      daysUntilDeadline,
+      daysUntilStart,
+      isHistorical: false,
+      canApply: false,
+      actionLabel: sourceUrl ? '历史参考 / 查看来源' : '暂无官方链接',
+      statusLabel: '已截止',
+      statusColorType: 'closed',
+      notifyReason: '报名截止时间已过，不可报名。',
+    };
+  }
+
+  if (daysUntilStart > 0) {
+    const startsSoon = daysUntilStart <= 7;
+    return {
+      radarStatus: '未开始',
+      priority: startsSoon ? 'medium' : 'low',
+      daysUntilDeadline,
+      daysUntilStart,
+      isHistorical: false,
+      canApply: false,
+      actionLabel: sourceUrl ? '查看官方通知' : '暂无官方链接',
+      statusLabel: startsSoon ? `距报名开始 ${daysUntilStart} 天` : '报名未开始',
+      statusColorType: 'future',
+      notifyReason: startsSoon ? `报名将在 ${daysUntilStart} 天后开始。` : '报名尚未开始。',
+    };
+  }
+
+  const canApply = verified && isRealSourceUrl(sourceUrl);
+  if (daysUntilDeadline <= 7) {
+    return {
+      radarStatus: '即将截止',
+      priority: 'high',
+      daysUntilDeadline,
+      daysUntilStart,
+      isHistorical: false,
+      canApply,
+      actionLabel: canApply ? '查看官方通知 / 去报名' : '查看来源',
+      statusLabel: `距截止 ${daysUntilDeadline} 天`,
+      statusColorType: 'hot',
+      notifyReason: `报名将在 ${daysUntilDeadline} 天内截止，请优先处理。`,
+    };
+  }
+
+  return {
+    radarStatus: '报名中',
+    priority: 'high',
+    daysUntilDeadline,
+    daysUntilStart,
+    isHistorical: false,
+    canApply,
+    actionLabel: canApply ? '查看官方通知 / 去报名' : '查看来源',
+    statusLabel: '报名中',
+    statusColorType: 'active',
+    notifyReason: '当前处于报名时间窗口内。',
+  };
 }
 
 export function isExamInRegion(item: ExamItem, region: RegionFilter): boolean {
@@ -133,6 +248,20 @@ export function buildCalendarEvents(items: ExamItem[]): CalendarEventMap {
 }
 
 export function getRelativeDeadlineText(item: ExamItem, today = new Date()): string {
+  const radar = getRadarInfo(item, today);
+  if (radar.isHistorical) {
+    return '历史参考，不可报名';
+  }
+  if (radar.radarStatus === '待核验') {
+    return '报名时间待核验';
+  }
+  if (radar.daysUntilStart !== null && radar.daysUntilStart > 0) {
+    return `距离报名开始 ${radar.daysUntilStart} 天`;
+  }
+  if (radar.daysUntilDeadline !== null && radar.daysUntilDeadline >= 0) {
+    return radar.daysUntilDeadline === 0 ? '今天截止' : `距截止 ${radar.daysUntilDeadline} 天`;
+  }
+
   if (item.status === '待核验' || !item.registrationEndDate) {
     return '报名时间待核验';
   }
@@ -183,11 +312,31 @@ export function isRealSourceUrl(url?: string | null): boolean {
 }
 
 export function canOpenOfficialSource(item: ExamItem): boolean {
-  return item.dataSourceType === 'official' && item.verified && isRealSourceUrl(item.sourceUrl);
+  return getRadarInfo(item).canApply && item.dataSourceType === 'official';
 }
 
 export function canOpenSourcePage(item: ExamItem): boolean {
   return item.dataSourceType === 'official' && isRealSourceUrl(item.sourceUrl);
+}
+
+export function getPriorityRank(priority: RadarInfo['priority']): number {
+  if (priority === 'high') return 0;
+  if (priority === 'medium') return 1;
+  return 2;
+}
+
+function detectHistoricalTitle(title: string, today: Date): boolean {
+  const currentYear = today.getFullYear();
+  const years = title.match(/20\d{2}/g) ?? [];
+  return years.some((year) => Number(year) < currentYear);
+}
+
+function normalizeDayValue(value: number | null): number | null {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return null;
+  }
+
+  return value;
 }
 
 function getDateTime(dateKey: string): number {

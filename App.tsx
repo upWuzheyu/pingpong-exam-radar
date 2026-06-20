@@ -39,6 +39,8 @@ import {
   canOpenSourcePage,
   getExamStatus,
   getImportantItems,
+  getPriorityRank,
+  getRadarInfo,
   isExamInRegion,
   sortByDeadline,
 } from './src/utils/exam';
@@ -129,6 +131,40 @@ export default function App() {
       })),
     [items, today]
   );
+  const radarItems = useMemo(
+    () =>
+      enrichedItems
+        .map((item) => ({ item, radar: getRadarInfo(item, today) }))
+        .sort((first, second) => {
+          const priorityDiff =
+            getPriorityRank(first.radar.priority) - getPriorityRank(second.radar.priority);
+          if (priorityDiff !== 0) {
+            return priorityDiff;
+          }
+
+          return (
+            (first.radar.daysUntilDeadline ?? Number.MAX_SAFE_INTEGER) -
+            (second.radar.daysUntilDeadline ?? Number.MAX_SAFE_INTEGER)
+          );
+        }),
+    [enrichedItems, today]
+  );
+  const radarStats = useMemo(
+    () => ({
+      total: radarItems.length,
+      pending: radarItems.filter(({ radar }) => radar.radarStatus === '待核验').length,
+      canApply: radarItems.filter(({ radar }) => radar.canApply).length,
+      closingSoon: radarItems.filter(({ radar }) => radar.radarStatus === '即将截止').length,
+      historical: radarItems.filter(({ radar }) => radar.isHistorical || radar.radarStatus === '已截止')
+        .length,
+    }),
+    [radarItems]
+  );
+  const highPriorityItems = useMemo(
+    () => radarItems.filter(({ radar }) => radar.priority === 'high').map(({ item }) => item),
+    [radarItems]
+  );
+  const sortedRadarList = useMemo(() => radarItems.map(({ item }) => item), [radarItems]);
 
   const important = useMemo(() => getImportantItems(enrichedItems, today), [enrichedItems, today]);
   const reminders = useMemo(() => buildReminderMessages(enrichedItems, today), [enrichedItems, today]);
@@ -304,10 +340,19 @@ export default function App() {
   const renderHome = () => (
     <View>
       <View style={styles.hero}>
-        <Text style={styles.heroEyebrow}>乒乓球考证报名雷达</Text>
-        <Text style={styles.heroTitle}>盯住报名窗口，别错过证书机会</Text>
+        <View style={styles.radarOrb}>
+          <Text style={styles.radarOrbText}>◉</Text>
+        </View>
+        <Text style={styles.heroEyebrow}>PING PONG RADAR 2.0</Text>
+        <Text style={styles.heroTitle}>乒乓雷达</Text>
         <Text style={styles.heroMeta}>
-          关注：{settings.certificateTypes.join('、')} · {settings.regions.join('、')}
+          全国乒乓球裁判员 / 教练员考试机会追踪
+        </Text>
+        <Text style={styles.heroMeta}>
+          最后更新时间：{new Date(settings.lastUpdatedAt).toLocaleString()}
+        </Text>
+        <Text style={styles.heroMeta}>
+          数据来源：{feedMessage}
         </Text>
       </View>
 
@@ -324,58 +369,43 @@ export default function App() {
         </Text>
       </View>
 
+      <View style={styles.statGrid}>
+        <StatCard label="发现机会" value={radarStats.total} accent="cyan" />
+        <StatCard label="待核验" value={radarStats.pending} accent="violet" />
+        <StatCard label="可报名" value={radarStats.canApply} accent="green" />
+        <StatCard label="即将截止" value={radarStats.closingSoon} accent="orange" />
+        <StatCard label="历史参考" value={radarStats.historical} accent="gray" />
+      </View>
+
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>今日提醒</Text>
-        {reminders.length === 0 ? (
-          <InfoBox title="今天没有紧急节点" body="可以看看即将截止和正在报名的考试。" />
+        <Text style={styles.sectionTitle}>今日重点提醒</Text>
+        {highPriorityItems.length === 0 ? (
+          <InfoBox title="暂无紧急报名机会" body="继续监控中，待核验线索可先查看来源。" />
         ) : (
-          reminders.slice(0, 4).map((reminder) => (
-            <View
-              key={`${reminder.item.id}-${reminder.message}`}
-              style={[styles.alertCard, reminder.level === 'critical' && styles.alertCardCritical]}
-            >
-              <Text style={styles.alertLabel}>{reminder.level === 'critical' ? '高亮提醒' : '报名提醒'}</Text>
-              <Text style={styles.alertText}>{reminder.message}</Text>
-              <Text style={styles.alertSubText}>{reminder.item.title}</Text>
-            </View>
-          ))
+          <ExamList
+            compact
+            items={highPriorityItems.slice(0, 3)}
+            onPress={setSelectedItem}
+            onOpen={openSource}
+          />
         )}
       </View>
 
-      <DashboardBlock
-        title="即将截止的报名"
-        items={important.closingSoon}
-        emptyText="暂无即将截止的报名"
-        onPress={setSelectedItem}
-        onOpen={openSource}
-      />
-      <DashboardBlock
-        title="正在报名的考试"
-        items={important.openNow}
-        emptyText="当前没有正在报名的考试"
-        onPress={setSelectedItem}
-        onOpen={openSource}
-      />
-      <DashboardBlock
-        title="最近新发现的报名机会"
-        items={important.recentlyFound}
-        emptyText="暂无新机会"
-        onPress={setSelectedItem}
-        onOpen={openSource}
-      />
+      <View style={styles.categoryGrid}>
+        <CategoryEntry label="裁判员机会" value={radarItems.filter(({ item }) => item.category === '裁判员').length} />
+        <CategoryEntry label="教练员机会" value={radarItems.filter(({ item }) => item.category === '教练员').length} />
+        <CategoryEntry label="待核验" value={radarStats.pending} />
+        <CategoryEntry label="历史参考" value={radarStats.historical} />
+      </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>我关注的证书</Text>
-        <View style={styles.focusGrid}>
-          {settings.certificateTypes.map((certificate) => (
-            <View key={certificate} style={styles.focusTile}>
-              <Text style={styles.focusTitle}>{certificate}</Text>
-              <Text style={styles.focusCount}>
-                {focusedItems.filter((item) => item.certificateType === certificate).length} 条机会
-              </Text>
-            </View>
-          ))}
-        </View>
+        <Text style={styles.sectionTitle}>机会列表</Text>
+        <ExamList
+          compact
+          items={sortedRadarList}
+          onPress={setSelectedItem}
+          onOpen={openSource}
+        />
       </View>
     </View>
   );
@@ -588,17 +618,17 @@ export default function App() {
             <TabButton active={activeTab === 'home'} label="首页" onPress={() => setActiveTab('home')} />
             <TabButton
               active={activeTab === 'opportunities'}
-              label="全国机会"
+              label="机会"
               onPress={() => setActiveTab('opportunities')}
             />
             <TabButton
               active={activeTab === 'focus'}
-              label="我的关注"
+              label="我的"
               onPress={() => setActiveTab('focus')}
             />
             <TabButton
               active={activeTab === 'calendar'}
-              label="日历视图"
+              label="提醒"
               onPress={() => setActiveTab('calendar')}
             />
             <TabButton
@@ -732,6 +762,32 @@ function InfoBox({ title, body }: { title: string; body: string }) {
   );
 }
 
+function StatCard({
+  accent,
+  label,
+  value,
+}: {
+  accent: 'cyan' | 'violet' | 'green' | 'orange' | 'gray';
+  label: string;
+  value: number;
+}) {
+  return (
+    <View style={[styles.statCard, styles[`statCard_${accent}`]]}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function CategoryEntry({ label, value }: { label: string; value: number }) {
+  return (
+    <View style={styles.categoryEntry}>
+      <Text style={styles.categoryEntryLabel}>{label}</Text>
+      <Text style={styles.categoryEntryValue}>{value}</Text>
+    </View>
+  );
+}
+
 function DashboardBlock({
   title,
   items,
@@ -788,7 +844,7 @@ function ExamList({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#eef5f7',
+    backgroundColor: '#07111f',
   },
   keyboardView: {
     flex: 1,
@@ -805,18 +861,18 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   appLabel: {
-    color: '#55707a',
+    color: '#79e8ff',
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 4,
   },
   appTitle: {
-    color: '#102027',
+    color: '#f8fbff',
     fontSize: 30,
     fontWeight: '900',
   },
   quickAddButton: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#5b5ff7',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -830,8 +886,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   tabButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d9e5e8',
+    backgroundColor: 'rgba(15, 23, 42, 0.86)',
+    borderColor: '#233b63',
     borderRadius: 8,
     borderWidth: 1,
     marginRight: 8,
@@ -839,11 +895,11 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   tabButtonActive: {
-    backgroundColor: '#102027',
-    borderColor: '#102027',
+    backgroundColor: '#2f6bff',
+    borderColor: '#79e8ff',
   },
   tabButtonText: {
-    color: '#4d626b',
+    color: '#9bb4d5',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -851,55 +907,74 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   hero: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d9e5e8',
+    backgroundColor: '#111a33',
+    borderColor: '#335dff',
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 14,
+    overflow: 'hidden',
     padding: 18,
   },
+  radarOrb: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(121, 232, 255, 0.13)',
+    borderColor: '#79e8ff',
+    borderRadius: 38,
+    borderWidth: 1,
+    height: 76,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    width: 76,
+  },
+  radarOrbText: {
+    color: '#79e8ff',
+    fontSize: 34,
+    fontWeight: '900',
+  },
   heroEyebrow: {
-    color: '#0f766e',
+    color: '#79e8ff',
     fontSize: 14,
     fontWeight: '900',
     marginBottom: 6,
   },
   heroTitle: {
-    color: '#102027',
-    fontSize: 24,
+    color: '#ffffff',
+    fontSize: 34,
     fontWeight: '900',
     lineHeight: 31,
     marginBottom: 10,
   },
   heroMeta: {
-    color: '#5e727c',
+    color: '#a9bce0',
     fontSize: 14,
     fontWeight: '700',
     lineHeight: 20,
   },
   dataNotice: {
-    backgroundColor: '#f8fbfc',
-    borderColor: '#cfe0e5',
+    backgroundColor: 'rgba(15, 23, 42, 0.78)',
+    borderColor: '#263f6c',
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 14,
     padding: 14,
   },
   dataNoticeTitle: {
-    color: '#102027',
+    color: '#f8fbff',
     fontSize: 16,
     fontWeight: '900',
     marginBottom: 6,
   },
   feedStatusText: {
-    color: '#0f766e',
+    color: '#79e8ff',
     fontSize: 13,
     fontWeight: '900',
     lineHeight: 19,
     marginBottom: 4,
   },
   dataNoticeText: {
-    color: '#526873',
+    color: '#9bb4d5',
     fontSize: 13,
     fontWeight: '700',
     lineHeight: 19,
@@ -908,95 +983,165 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   sectionTitle: {
-    color: '#102027',
+    color: '#f8fbff',
     fontSize: 18,
     fontWeight: '900',
     marginBottom: 10,
   },
   mutedText: {
-    color: '#657985',
+    color: '#9bb4d5',
     fontSize: 14,
     lineHeight: 21,
   },
   alertCard: {
-    backgroundColor: '#fff7ed',
-    borderColor: '#fed7aa',
+    backgroundColor: 'rgba(124, 45, 18, 0.62)',
+    borderColor: '#fb923c',
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 10,
     padding: 13,
   },
   alertCardCritical: {
-    backgroundColor: '#fff1f2',
-    borderColor: '#fecdd3',
+    backgroundColor: 'rgba(127, 29, 29, 0.72)',
+    borderColor: '#f97316',
   },
   alertLabel: {
-    color: '#c2410c',
+    color: '#fed7aa',
     fontSize: 13,
     fontWeight: '900',
     marginBottom: 4,
   },
   alertText: {
-    color: '#7c2d12',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '900',
     lineHeight: 22,
   },
   alertSubText: {
-    color: '#8a4b1f',
+    color: '#fed7aa',
     fontSize: 13,
     fontWeight: '700',
     marginTop: 5,
   },
   infoBox: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d9e5e8',
+    backgroundColor: 'rgba(15, 23, 42, 0.78)',
+    borderColor: '#263f6c',
     borderRadius: 8,
     borderStyle: 'dashed',
     borderWidth: 1,
     padding: 14,
   },
   infoTitle: {
-    color: '#263941',
+    color: '#f8fbff',
     fontSize: 15,
     fontWeight: '900',
     marginBottom: 4,
   },
   infoBody: {
-    color: '#657985',
+    color: '#9bb4d5',
     fontSize: 13,
     lineHeight: 19,
   },
   list: {
     gap: 10,
   },
+  statGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    borderRadius: 8,
+    borderWidth: 1,
+    minWidth: '30%',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  statCard_cyan: {
+    backgroundColor: 'rgba(6, 182, 212, 0.13)',
+    borderColor: '#22d3ee',
+  },
+  statCard_violet: {
+    backgroundColor: 'rgba(124, 58, 237, 0.16)',
+    borderColor: '#a78bfa',
+  },
+  statCard_green: {
+    backgroundColor: 'rgba(34, 197, 94, 0.14)',
+    borderColor: '#4ade80',
+  },
+  statCard_orange: {
+    backgroundColor: 'rgba(249, 115, 22, 0.16)',
+    borderColor: '#fb923c',
+  },
+  statCard_gray: {
+    backgroundColor: 'rgba(148, 163, 184, 0.12)',
+    borderColor: '#64748b',
+  },
+  statValue: {
+    color: '#ffffff',
+    fontSize: 26,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  statLabel: {
+    color: '#b8c7e6',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 16,
+  },
+  categoryEntry: {
+    backgroundColor: 'rgba(15, 23, 42, 0.82)',
+    borderColor: '#335dff',
+    borderRadius: 8,
+    borderWidth: 1,
+    flexGrow: 1,
+    minWidth: '47%',
+    padding: 14,
+  },
+  categoryEntryLabel: {
+    color: '#dbe8ff',
+    fontSize: 14,
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+  categoryEntryValue: {
+    color: '#79e8ff',
+    fontSize: 22,
+    fontWeight: '900',
+  },
   focusGrid: {
     flexDirection: 'row',
     gap: 10,
   },
   focusTile: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d9e5e8',
+    backgroundColor: 'rgba(15, 23, 42, 0.78)',
+    borderColor: '#263f6c',
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
     padding: 13,
   },
   focusTitle: {
-    color: '#102027',
+    color: '#f8fbff',
     fontSize: 15,
     fontWeight: '900',
     lineHeight: 20,
     marginBottom: 8,
   },
   focusCount: {
-    color: '#0f766e',
+    color: '#79e8ff',
     fontSize: 14,
     fontWeight: '900',
   },
   filterPanel: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d9e5e8',
+    backgroundColor: 'rgba(15, 23, 42, 0.78)',
+    borderColor: '#263f6c',
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 14,
@@ -1009,24 +1154,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   chip: {
-    backgroundColor: '#f4f8f9',
-    borderColor: '#d9e5e8',
+    backgroundColor: '#111a33',
+    borderColor: '#263f6c',
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 11,
     paddingVertical: 8,
   },
   chipActive: {
-    backgroundColor: '#dff7f3',
-    borderColor: '#0f766e',
+    backgroundColor: '#2f6bff',
+    borderColor: '#79e8ff',
   },
   chipText: {
-    color: '#526873',
+    color: '#9bb4d5',
     fontSize: 13,
     fontWeight: '800',
   },
   chipTextActive: {
-    color: '#0f5f59',
+    color: '#ffffff',
   },
   monthControls: {
     alignItems: 'center',

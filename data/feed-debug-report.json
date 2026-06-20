@@ -68,7 +68,7 @@
       }
     ],
     "errorMessage": "",
-    "checkedAt": "2026-06-20T16:40:00.263Z"
+    "checkedAt": "2026-06-20T17:03:55.511Z"
   },
   {
     "sourceName": "广东省乒乓球协会",
@@ -106,19 +106,19 @@
       }
     ],
     "errorMessage": "",
-    "checkedAt": "2026-06-20T16:40:00.375Z"
+    "checkedAt": "2026-06-20T17:03:55.628Z"
   },
   {
     "sourceName": "常州市体育局",
     "sourceUrl": "https://tyj.changzhou.gov.cn/",
     "ok": true,
     "statusCode": 200,
-    "htmlLength": 61141,
+    "htmlLength": 61177,
     "totalLinksFound": 92,
     "matchedLinksCount": 0,
     "matchedLinks": [],
     "errorMessage": "",
-    "checkedAt": "2026-06-20T16:40:00.545Z"
+    "checkedAt": "2026-06-20T17:03:55.789Z"
   },
   {
     "sourceName": "山西省体育局",
@@ -153,7 +153,7 @@
       }
     ],
     "errorMessage": "",
-    "checkedAt": "2026-06-20T16:40:00.936Z"
+    "checkedAt": "2026-06-20T17:03:56.074Z"
   },
   {
     "sourceName": "江西省体育局",
@@ -165,6 +165,6 @@
     "matchedLinksCount": 0,
     "matchedLinks": [],
     "errorMessage": "",
-    "checkedAt": "2026-06-20T16:40:01.386Z"
+    "checkedAt": "2026-06-20T17:03:56.506Z"
   }
 ]
