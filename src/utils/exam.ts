@@ -10,8 +10,16 @@ export const CERTIFICATE_TYPES: CertificateType[] = [
 export const REGION_OPTIONS: RegionFilter[] = ['山西', '江西', '全国'];
 
 export function getExamStatus(item: ExamItem, today = new Date()): ExamStatus {
+  if (item.status === '待核验' || !item.registrationEndDate || !item.registrationStartDate) {
+    return '待核验';
+  }
+
   const startDiff = dayDifference(today, item.registrationStartDate);
   const endDiff = dayDifference(today, item.registrationEndDate);
+
+  if (Number.isNaN(startDiff) || Number.isNaN(endDiff)) {
+    return '待核验';
+  }
 
   if (endDiff < 0) {
     return '已截止';
@@ -38,9 +46,7 @@ export function isExamInRegion(item: ExamItem, region: RegionFilter): boolean {
 
 export function sortByDeadline(items: ExamItem[]): ExamItem[] {
   return [...items].sort(
-    (first, second) =>
-      new Date(first.registrationEndDate).getTime() -
-      new Date(second.registrationEndDate).getTime()
+    (first, second) => getDateTime(first.registrationEndDate) - getDateTime(second.registrationEndDate)
   );
 }
 
@@ -49,6 +55,9 @@ export function getImportantItems(items: ExamItem[], today = new Date()) {
 
   return {
     closingSoon: openCandidates.filter((item) => {
+      if (item.status === '待核验') {
+        return false;
+      }
       const days = dayDifference(today, item.registrationEndDate);
       return days >= 0 && days <= 7;
     }),
@@ -63,6 +72,10 @@ export function getImportantItems(items: ExamItem[], today = new Date()) {
 export function buildReminderMessages(items: ExamItem[], today = new Date()) {
   return items
     .flatMap((item) => {
+      if (item.status === '待核验') {
+        return [];
+      }
+
       const startDiff = dayDifference(today, item.registrationStartDate);
       const endDiff = dayDifference(today, item.registrationEndDate);
       const messages: { item: ExamItem; message: string; level: 'warning' | 'critical' }[] = [];
@@ -102,18 +115,28 @@ export function buildCalendarEvents(items: ExamItem[]): CalendarEventMap {
     const deadlineKey = item.registrationEndDate;
     const examKey = item.examDate;
 
-    events[startKey] = events[startKey] ?? { deadline: 0, exam: 0, start: 0 };
-    events[startKey].start += 1;
-    events[deadlineKey] = events[deadlineKey] ?? { deadline: 0, exam: 0, start: 0 };
-    events[deadlineKey].deadline += 1;
-    events[examKey] = events[examKey] ?? { deadline: 0, exam: 0, start: 0 };
-    events[examKey].exam += 1;
+    if (startKey) {
+      events[startKey] = events[startKey] ?? { deadline: 0, exam: 0, start: 0 };
+      events[startKey].start += 1;
+    }
+    if (deadlineKey) {
+      events[deadlineKey] = events[deadlineKey] ?? { deadline: 0, exam: 0, start: 0 };
+      events[deadlineKey].deadline += 1;
+    }
+    if (examKey && /^\d{4}-\d{2}-\d{2}$/.test(examKey)) {
+      events[examKey] = events[examKey] ?? { deadline: 0, exam: 0, start: 0 };
+      events[examKey].exam += 1;
+    }
 
     return events;
   }, {});
 }
 
 export function getRelativeDeadlineText(item: ExamItem, today = new Date()): string {
+  if (item.status === '待核验' || !item.registrationEndDate) {
+    return '报名时间待核验';
+  }
+
   const days = dayDifference(today, item.registrationEndDate);
 
   if (days < 0) {
@@ -161,4 +184,17 @@ export function isRealSourceUrl(url?: string | null): boolean {
 
 export function canOpenOfficialSource(item: ExamItem): boolean {
   return item.dataSourceType === 'official' && item.verified && isRealSourceUrl(item.sourceUrl);
+}
+
+export function canOpenSourcePage(item: ExamItem): boolean {
+  return item.dataSourceType === 'official' && isRealSourceUrl(item.sourceUrl);
+}
+
+function getDateTime(dateKey: string): number {
+  if (!dateKey) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  const time = new Date(dateKey).getTime();
+  return Number.isNaN(time) ? Number.MAX_SAFE_INTEGER : time;
 }

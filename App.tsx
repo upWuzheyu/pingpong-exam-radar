@@ -36,6 +36,7 @@ import {
   buildCalendarEvents,
   buildReminderMessages,
   canOpenOfficialSource,
+  canOpenSourcePage,
   getExamStatus,
   getImportantItems,
   isExamInRegion,
@@ -56,7 +57,7 @@ type ManualForm = {
   note: string;
 };
 
-const STATUS_OPTIONS: ExamStatus[] = ['报名中', '即将截止', '未开始', '已截止'];
+const STATUS_OPTIONS: ExamStatus[] = ['报名中', '即将截止', '未开始', '已截止', '待核验'];
 const TIME_OPTIONS: TimeFilter[] = ['全部', '最近7天', '最近30天'];
 
 const initialSettings: Settings = {
@@ -182,7 +183,7 @@ export default function App() {
   const openSource = async (item: ExamItem) => {
     const sourceUrl = item.sourceUrl.trim();
 
-    if (!canOpenOfficialSource(item)) {
+    if (!canOpenSourcePage(item)) {
       Alert.alert(
         '暂无官方链接',
         '暂无真实报名链接，请以官方体育局/乒协/学校通知为准，后续可手动补充链接。'

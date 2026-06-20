@@ -1,6 +1,6 @@
 export type CertificateType = '初级教练员证' | '二级裁判员证' | '乒乓球二级裁判员证';
 
-export type ExamStatus = '未开始' | '报名中' | '即将截止' | '已截止';
+export type ExamStatus = '未开始' | '报名中' | '即将截止' | '已截止' | '待核验';
 
 export type RegionFilter = '山西' | '江西' | '全国';
 

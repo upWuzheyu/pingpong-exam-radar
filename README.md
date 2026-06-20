@@ -30,6 +30,7 @@ npx expo start --lan --clear
 1. 本地数据：`src/data/examItems.ts`
 2. 远程 JSON：由 `src/config/feedConfig.ts` 中的 `REMOTE_FEED_URL` 配置
 3. GitHub Actions 生成数据：`data/exam-feed.generated.json`
+4. 试点真实来源抓取：`data/feed-sources.json`
 
 远程读取逻辑在：
 
@@ -85,12 +86,21 @@ GitHub Actions：
 ```
 
 当前还不是完整爬虫，只是自动更新框架。脚本目前读取示例配置并输出：
+当前脚本已经开始试点读取少量真实来源网页：
+
+```text
+data/feed-sources.json
+```
+
+脚本会抓取来源页面中的链接标题，筛选包含乒乓球、裁判员、教练员、培训、报名、通知等关键词的候选信息。自动抓取到的数据默认是 `dataSourceType: "official"`，但只要日期、地点等关键字段无法解析，就会标记为 `verified: false` 和 `status: "待核验"`。
+
+当前还不是完整爬虫，不保证覆盖全国，也不保证能解析所有字段，需要继续添加来源和人工核验逻辑。脚本输出：
 
 ```text
 data/exam-feed.generated.json
 ```
 
-以后可以在 `scripts/updateExamFeed.js` 中加入真实网站检查逻辑，例如检查官方体育局、乒协、学校、培训机构通知页面，再把核验后的通知转换为 App 的 `ExamItem` 数据。
+以后可以在 `scripts/updateExamFeed.js` 中继续增加真实网站检查逻辑，例如进入详情页解析报名开始日期、报名截止日期、培训地点，再把核验后的通知转换为 `verified: true` 的 `ExamItem` 数据。
 
 GitHub Actions 每天北京时间上午 8 点左右运行一次，也支持手动触发 `workflow_dispatch`。如果生成的 `data/exam-feed.generated.json` 有变化，会自动提交到仓库。
 

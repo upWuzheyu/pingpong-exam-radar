@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ExamItem, ExamStatus } from '../types';
-import { canOpenOfficialSource, getRelativeDeadlineText } from '../utils/exam';
+import { canOpenOfficialSource, canOpenSourcePage, getRelativeDeadlineText } from '../utils/exam';
 
 type ExamCardProps = {
   compact?: boolean;
@@ -14,7 +14,8 @@ type ExamCardProps = {
 
 export default function ExamCard({ compact, detailed, item, onOpen, onPress }: ExamCardProps) {
   const ended = item.status === '已截止';
-  const canOpenSource = canOpenOfficialSource(item);
+  const canGoRegister = canOpenOfficialSource(item);
+  const canOpenSource = canOpenSourcePage(item);
 
   return (
     <TouchableOpacity
@@ -43,14 +44,14 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
       </Text>
 
       <View style={styles.noticeStack}>
-        {canOpenSource ? (
+        {canGoRegister ? (
           <Text style={styles.officialNotice}>真实官方通知</Text>
         ) : null}
         {item.isMock ? (
           <Text style={styles.mockNotice}>示例数据，非真实报名通知</Text>
         ) : null}
         {!item.verified ? (
-          <Text style={styles.unverifiedNotice}>未核验，请以官方通知为准</Text>
+          <Text style={styles.unverifiedNotice}>待人工核验，请以官方通知为准</Text>
         ) : null}
       </View>
 
@@ -60,7 +61,7 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
           <DetailLine label="考试地点" value={item.location} />
           <DetailLine label="数据类型" value={getDataSourceLabel(item.dataSourceType)} />
           <DetailLine label="来源链接" value={item.sourceUrl || '暂无官方链接'} />
-          <DetailLine label="链接状态" value={canOpenSource ? '查看官方通知' : '暂无官方链接'} />
+          <DetailLine label="链接状态" value={canGoRegister ? '查看官方通知' : canOpenSource ? '查看来源' : '暂无官方链接'} />
           <DetailLine label="最后检查" value={new Date(item.lastCheckedAt).toLocaleString()} />
           <DetailLine label="备注" value={item.note} />
         </View>
@@ -72,7 +73,7 @@ export default function ExamCard({ compact, detailed, item, onOpen, onPress }: E
         style={[styles.linkButton, !canOpenSource && styles.linkButtonDisabled]}
       >
         <Text style={[styles.linkButtonText, !canOpenSource && styles.linkButtonTextDisabled]}>
-          {canOpenSource ? '查看官方通知 / 去报名' : '暂无官方链接'}
+          {canGoRegister ? '查看官方通知 / 去报名' : canOpenSource ? '查看来源' : '暂无官方链接'}
         </Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -128,6 +129,9 @@ const statusStyles = StyleSheet.create({
   已截止: {
     backgroundColor: '#e5e7eb',
   },
+  待核验: {
+    backgroundColor: '#fef3c7',
+  },
 });
 
 const statusTextStyles = StyleSheet.create({
@@ -142,6 +146,9 @@ const statusTextStyles = StyleSheet.create({
   },
   已截止: {
     color: '#6b7280',
+  },
+  待核验: {
+    color: '#92400e',
   },
 });
 
