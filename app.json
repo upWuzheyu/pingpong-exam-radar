@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Calendar App",
+    "slug": "calendar-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "sdkVersion": "54.0.0",
+    "splash": {
+      "backgroundColor": "#f7f8fb"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "edgeToEdgeEnabled": true
+    }
+  }
+}
