@@ -72,7 +72,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-06-28T03:40:57.829Z",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -91,7 +91,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-06-28T03:40:57.829Z",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -110,7 +110,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-06-28T03:40:57.829Z",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -129,7 +129,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-06-28T03:40:57.829Z",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -148,7 +148,45 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-06-28T03:40:57.829Z",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
+    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
+  },
+  {
+    "id": "auto-1abdbc621a34",
+    "title": "2026年常州市足球项目二级裁判员培训班开班",
+    "certificateType": "二级裁判员证",
+    "province": "江苏",
+    "city": "常州",
+    "organization": "常州市体育局",
+    "registrationStartDate": "",
+    "registrationEndDate": "",
+    "examDate": "",
+    "location": "",
+    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_0612/25392.html",
+    "status": "待核验",
+    "isMock": false,
+    "verified": false,
+    "dataSourceType": "official",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
+    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
+  },
+  {
+    "id": "auto-81abb3018981",
+    "title": "关于举办2026年常州市门球项目二级裁判员培训班",
+    "certificateType": "二级裁判员证",
+    "province": "江苏",
+    "city": "常州",
+    "organization": "常州市体育局",
+    "registrationStartDate": "",
+    "registrationEndDate": "",
+    "examDate": "",
+    "location": "",
+    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_0601/25373.html",
+    "status": "待核验",
+    "isMock": false,
+    "verified": false,
+    "dataSourceType": "official",
+    "lastCheckedAt": "2026-06-29T03:46:52.307Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   }
 ]
