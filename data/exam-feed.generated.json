@@ -72,7 +72,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -91,7 +91,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -110,7 +110,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -129,7 +129,26 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
+    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
+  },
+  {
+    "id": "auto-b71b4baead33",
+    "title": "关于举办2026年第六届广东省乒协杯青少年儿童乒乓球赛的通知",
+    "certificateType": "初级教练员证",
+    "province": "广东",
+    "city": "",
+    "organization": "广东省乒乓球协会",
+    "registrationStartDate": "",
+    "registrationEndDate": "",
+    "examDate": "",
+    "location": "",
+    "sourceUrl": "https://gdtta.cn/match/125",
+    "status": "待核验",
+    "isMock": false,
+    "verified": false,
+    "dataSourceType": "official",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -148,7 +167,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -167,7 +186,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -186,7 +205,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -205,7 +224,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -224,7 +243,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -243,7 +262,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -262,7 +281,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-09-01T03:39:39.147Z",
+    "lastCheckedAt": "2026-09-02T02:58:01.835Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   }
 ]
