@@ -72,7 +72,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -91,7 +91,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -110,7 +110,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -129,7 +129,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -148,7 +148,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -167,7 +167,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -186,7 +186,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -205,83 +205,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
-    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
-  },
-  {
-    "id": "auto-2b7d89b4a715",
-    "title": "2026年常州市体育竞赛干部培训班顺利开班",
-    "certificateType": "初级教练员证",
-    "province": "江苏",
-    "city": "常州",
-    "organization": "常州市体育局",
-    "registrationStartDate": "",
-    "registrationEndDate": "",
-    "examDate": "",
-    "location": "",
-    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_1026/25612.html",
-    "status": "待核验",
-    "isMock": false,
-    "verified": false,
-    "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
-    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
-  },
-  {
-    "id": "auto-9948afbaf700",
-    "title": "2026年第二期常州足球三级裁判员培训班开班",
-    "certificateType": "二级裁判员证",
-    "province": "江苏",
-    "city": "常州",
-    "organization": "常州市体育局",
-    "registrationStartDate": "",
-    "registrationEndDate": "",
-    "examDate": "",
-    "location": "",
-    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_1021/25604.html",
-    "status": "待核验",
-    "isMock": false,
-    "verified": false,
-    "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
-    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
-  },
-  {
-    "id": "auto-f5e0317e38b8",
-    "title": "2026年常州市汽车摩托车二级裁判员培训班开班",
-    "certificateType": "二级裁判员证",
-    "province": "江苏",
-    "city": "常州",
-    "organization": "常州市体育局",
-    "registrationStartDate": "",
-    "registrationEndDate": "",
-    "examDate": "",
-    "location": "",
-    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_1020/25603.html",
-    "status": "待核验",
-    "isMock": false,
-    "verified": false,
-    "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
-    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
-  },
-  {
-    "id": "auto-f7752658fa15",
-    "title": "2026年常州市啦啦操二级裁判员培训班顺利举办",
-    "certificateType": "二级裁判员证",
-    "province": "江苏",
-    "city": "常州",
-    "organization": "常州市体育局",
-    "registrationStartDate": "",
-    "registrationEndDate": "",
-    "examDate": "",
-    "location": "",
-    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_1020/25602.html",
-    "status": "待核验",
-    "isMock": false,
-    "verified": false,
-    "dataSourceType": "official",
-    "lastCheckedAt": "2026-10-28T04:04:53.814Z",
+    "lastCheckedAt": "2026-10-29T04:27:54.960Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   }
 ]
