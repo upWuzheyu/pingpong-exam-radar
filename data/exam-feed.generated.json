@@ -72,7 +72,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-11-18T05:57:56.561Z",
+    "lastCheckedAt": "2026-11-19T05:58:04.180Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   },
   {
@@ -91,26 +91,7 @@
     "isMock": false,
     "verified": false,
     "dataSourceType": "official",
-    "lastCheckedAt": "2026-11-18T05:57:56.561Z",
-    "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
-  },
-  {
-    "id": "auto-2b7d89b4a715",
-    "title": "2026年常州市体育竞赛干部培训班顺利开班",
-    "certificateType": "初级教练员证",
-    "province": "江苏",
-    "city": "常州",
-    "organization": "常州市体育局",
-    "registrationStartDate": "",
-    "registrationEndDate": "",
-    "examDate": "",
-    "location": "",
-    "sourceUrl": "https://tyj.changzhou.gov.cn/html/tyj/2026/FMAJENJH_1026/25612.html",
-    "status": "待核验",
-    "isMock": false,
-    "verified": false,
-    "dataSourceType": "official",
-    "lastCheckedAt": "2026-11-18T05:57:56.561Z",
+    "lastCheckedAt": "2026-11-19T05:58:04.180Z",
     "note": "自动抓取，部分字段待人工核验。请以官方体育局、乒协、学校或培训机构通知为准。"
   }
 ]
